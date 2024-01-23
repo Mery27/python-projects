@@ -1,8 +1,9 @@
 
 # Python projekt 1 - Textový analyzátor
 
-Může načíst jednoduchý textový (.txt) soubor, který se nachází ve stejném adresáři jako python soubor nebo zpracuje data v proměnné TEXTS.
-Ze souboru převede text do jedné proměnné. U výchozí proměnné, která je list, lze vybrat, kterou část chcete analyzovat.
+Může načíst jednoduchý textový (.txt) soubor, který se nachází ve stejném adresáři jako python soubor nebo zpracuje výchozí texty v souboru default_data.py.
+- U výchozího textu, který je list, lze vybrat, kterou část chcete analyzovat.
+- Z textového souboru (.txt) převede text do jedné proměnné.
 
 ## Funkce
 
@@ -12,10 +13,10 @@ Ze souboru převede text do jedné proměnné. U výchozí proměnné, která je
 
 ## Nastavení
 
-Na začátku programu si lze v proměnných nastavit:
+V settings.py si lze v proměnných nastavit:
 - maximální šířku řádku, text se podle šířky ořízne, max_length = 60
 - které znaky se mají z textu odebrat, popřípadě nahradit, list_replace_chars = .,?!'"\n
-- do kolika textů v proměnné TEXTS se má zobrazit i slovní nábídka pro výběr, show_max_options = 10 např. 1) První text k analýze... (345) 2) Druhý text k analýze... (234)
+- do jakého počtu textů v proměnné TEXTS (default_data.py) se má zobrazit i slovní nábídka pro výběr, show_max_options = 10 např. 1) První text k analýze... (345) 2) Druhý text k analýze... (234)
 - jaké soubory jsou povolené pro načtení textů, text_files = [\"txt\"]
 - hlavička tabulky, table_head = ["LEN", "OCCURENCES", "NR."]
 - oddělovač v tabulce, table_separator = "|"
