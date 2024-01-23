@@ -1,11 +1,10 @@
 import math
-from settings import *
+from settings import max_length
 
 ##-----------------------------------------------------------------------------
 ### Definice pomocných funkcí
 ##-----------------------------------------------------------------------------
 # výpočet, na kolik řádku se vleze text v závislosti na šířce řádku
-# max_length se volí na začátku programu v Nastavení aplikace
 def text_rows(text_value, text_max_length=max_length):
     rows = math.ceil((len(text_value)) / text_max_length)
     return rows
