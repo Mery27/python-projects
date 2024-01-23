@@ -11,6 +11,12 @@ import math
 # kontrola souborů
 import os
 
+# nastavení, výchozí data, uživatelé
+from settings import *
+from defatul_data import TEXTS
+from users import users
+from functions import *
+
 ##-----------------------------------------------------------------------------
 ### Testování aplikace
 ##-----------------------------------------------------------------------------
@@ -28,142 +34,6 @@ selected_text_index = "1"
 use_file = True
 # který soubor se vezme pro test
 file = "data.txt"
-
-##-----------------------------------------------------------------------------
-### Nastavení aplikace
-##-----------------------------------------------------------------------------
-# maximální délka řádku, pokud je menší, text se ořízne
-# optimální je 50 a více a pro menší hodnoty už to nemusí být zcela přehledné
-max_length = 60
-# seznam znaků, které se mají v textu nahradit
-# { co_se_nahradi: cim_se_nahradi }
-list_replace_chars = {
-    ".": "",
-    ",": "",
-    "?": "",
-    "!": "",
-    "'": "",
-    "\"": "",
-    "\n": " "
-    }
-# pro kolik textů se má zobrazovat seznam k výběru
-# v opačném případě se zobrazí pouze rozsah např. od 1 po 20
-# v případě, že by list TEXTS měl spoustu položek
-# 1) První text k analýze... (345)
-# 2) Druhý text k analýze... (234)
-show_max_options = 10
-# od jaké hodnoty se má zobrazovat seznam textů k analýze
-# pro přehlednost je lepší volit 1 než 0, ale dá se nastavit i jiné číslo
-text_range_from = 1
-# vyhledá pouze soubory s .txt koncovkou
-# dá se do listu přidat i další typ souborum který bude obsahovat pouze text
-text_files = ["txt"]
-# hlavička tabulky
-table_head = ["LEN", "OCCURENCES", "NR."]
-# oddělovač v tabulce
-table_separator = "|"
-# symbol pro vyjádření počtu slov v tabulce
-char_for_graph = "*"
-# výchozí hodnota pro rozšíření prostředního sloupce
-# pro lepší přehlednost bude mít odsazení od třetího sloupce
-# doporučená hodnota je do 10, pro větší texty se doporučuje menší hodnota
-# jinak dojde k rozhození tabulky
-more_space_for_midle_column = 2
-# kolik nejpoužívanějších slov se má vypsat
-number_most_used_words = 10
-# výchozí text k analýze
-TEXTS = [
-    """Situated about 10 miles west of Kemmerer,
-Fossil Butte is a ruggedly impressive
-topographic feature that rises sharply
-some 1000 feet above Twin Creek Valley
-to an elevation of more than 7500 feet
-above sea level. The butte is located just
-north of US 30N and the Union Pacific Railroad,
-which traverse the valley. """,
-    """At the base of Fossil Butte are the bright
-red, purple, yellow and gray beds of the Wasatch
-Formation. Eroded portions of these horizontal
-beds slope gradually upward from the valley floor
-and steepen abruptly. Overlying them and extending
-to the top of the butte are the much steeper
-buff-to-white beds of the Green River Formation,
-which are about 300 feet thick.""",
-    """The monument contains 8198 acres and protects
-a portion of the largest deposit of freshwater fish
-fossils in the world. The richest fossil fish deposits
-are found in multiple limestone layers, which lie some
-100 feet below the top of the butte. The fossils
-represent several varieties of perch, as well as
-other freshwater genera and herring similar to those
-in modern oceans. Other fish such as paddlefish,
-garpike and stingray are also present.""",
-]
-# uživatelé
-users = {
-    "bob": "123",
-    "ann": "pass123",
-    "mike": "password123",
-    "liz": "pass123",
-}
-##-----------------------------------------------------------------------------
-### Definice pomocných funkcí
-##-----------------------------------------------------------------------------
-# výpočet, na kolik řádku se vleze text v závislosti na šířce řádku
-# max_length se volí na začátku programu v Nastavení aplikace
-def text_rows(text_value, text_max_length=max_length):
-    rows = math.ceil((len(text_value)) / text_max_length)
-    return rows
-
-# ořezání stringu dle délky řádku
-# není úplně nejšikovnější, dalo by se zpracovat, aby neořezávalo uprostřed slova
-# TODO oříznutí celého slova a ne po písmenu
-# jít po písmenu a pokud se má ořezávat a aktuální znak je písmeno
-# vrátit zpět dokud nebude aktuální znak mezera a až pak oříznout
-def print_max_length(
-    text_value,
-    text_max_length=max_length,
-    end="\n"
-    ):
-    rows = text_rows(text_value)
-    # vypíše text a pokud je potřeba text ořezat, tak text vypíše na více řádků
-    for row in range(1, rows + 1):
-        print(text_value[text_max_length * (row - 1) : (text_max_length * row)],
-              end=end
-              )
-        
-# čára, kterou si lze upravit dle potřeb
-# title = uprostřed se zobrazí nadpis
-# length = délka čáry, výchozí je rovna délce řádku
-# separator = oddělovač, jaký vzhled bude mít čára
-# delining = odřádkování, zda bude nějaká mezera nebo ne (zadá se "None")
-#
-# vzor separating_line("Nadpis", separator = "*")
-#
-# ************************** Nadpis **************************
-#
-def separating_line(
-    title=None,
-    length=max_length,
-    separator="=",
-    delining_top="\n",
-    delining_bottom="None"
-    ):
-    delining_top = False if delining_top == "None" else delining_top
-    delining_bottom = False if delining_bottom == "None" else delining_bottom
-
-    print(delining_top) if delining_top else None
-    if title is None:
-        print("".center(length, separator))
-    else:
-        rows = text_rows(title)
-        if rows > 1:
-            print(f"".center(length, separator))
-            print_max_length(title)
-            print(f"".center(length, separator))
-        else:
-            print(f" {title} ".center(length, separator))
-    print(delining_bottom) if delining_bottom else None
 
 ##-----------------------------------------------------------------------------
 ### Přihlášení
