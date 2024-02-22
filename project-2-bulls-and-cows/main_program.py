@@ -56,7 +56,6 @@ random_number_string = pf.str_from_list(random_number, sep="")
 user = settings["default_name"] if pf.is_user(settings) else None
 
 pf.welcome_message(user_name=settings["default_name"], digits=settings["default_digits"])
-# pf.help_menu(settings["default_help_menu_items"])
 
 while game_run:
 
@@ -81,7 +80,6 @@ while game_run:
         continue
     
     if user_tip == settings["default_quit"] or user_tip == settings["default_quit"][0]:
-
         pf.cprint(f"You quit the game after {guesses} guesses.", "light_green")
 
         datetime_quit = pf.get_current_datetime_raw()
@@ -108,12 +106,10 @@ while game_run:
         pf.cprint(f"The number cannot start with zero.", "light_red")
 
     elif not user_tip.isdigit() or not len(user_tip) == settings["default_digits"]:
-
         pf.cprint(f"You must write only {settings['default_digits']} digit number.", "light_red")
         pf.separator_line()
 
     elif pf.is_duplicate_number(user_tip):
-
         duplicates = ", ".join(pf.find_duplicate_number(user_tip))
         inflection_number = pf.get_inflection_str('number', len(duplicates))
         pf.cprint(f"You are enter duplicate {inflection_number} {duplicates}", "light_red")
@@ -121,7 +117,6 @@ while game_run:
         pf.separator_line()
 
     else:
-
         result = pf.get_match_result(user_tip, random_number)
         bulls = result["bulls"]
         cows = result["cows"]
