@@ -109,6 +109,7 @@ while game_run:
 
     elif user_tip[0] == "0" or not number_generator.default_first_digit_is_null:
         pf.cprint(f"The number cannot start with zero.", "light_red")
+        pf.separator_line()
 
     elif not user_tip.isdigit() or not len(user_tip) == settings["default_digits"]:
         pf.cprint(f"You must write only {settings['default_digits']} digit number.", "light_red")
