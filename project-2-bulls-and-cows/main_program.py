@@ -76,7 +76,7 @@ while game_run:
             pf.clear_user_file(user)
             pf.separator_line()
         else:
-            pf.cprint("As Guest you cannot cleared file.", "red")
+            pf.cprint("As Guest you cannot cleared file.", "light_red")
             pf.separator_line()
         continue
     
@@ -105,18 +105,18 @@ while game_run:
         game_run = False
 
     elif user_tip[0] == "0" or not number_generator.default_first_digit_is_null:
-        pf.cprint(f"The number cannot start with zero.", "red")
+        pf.cprint(f"The number cannot start with zero.", "light_red")
 
     elif not user_tip.isdigit() or not len(user_tip) == settings["default_digits"]:
 
-        pf.cprint(f"You must write only {settings['default_digits']} digit number.", "red")
+        pf.cprint(f"You must write only {settings['default_digits']} digit number.", "light_red")
         pf.separator_line()
 
     elif pf.is_duplicate_number(user_tip):
 
         duplicates = ", ".join(pf.find_duplicate_number(user_tip))
         inflection_number = pf.get_inflection_str('number', len(duplicates))
-        pf.cprint(f"You are enter duplicate {inflection_number} {duplicates}", "red")
+        pf.cprint(f"You are enter duplicate {inflection_number} {duplicates}", "light_red")
         print("Please enter number without repeating same number.")
         pf.separator_line()
 
