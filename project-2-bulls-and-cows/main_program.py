@@ -107,7 +107,7 @@ while game_run:
         pf.cprint(f"You dont enter any value.", "light_red")
         pf.separator_line()
 
-    elif user_tip[0] == "0" or not number_generator.default_first_digit_is_null:
+    elif user_tip[0] == "0" and not number_generator.default_first_digit_is_null:
         pf.cprint(f"The number cannot start with zero.", "light_red")
         pf.separator_line()
 
