@@ -3,7 +3,6 @@ My custom functions for main program
 '''
 
 import math
-from textwrap import dedent
 from datetime import datetime
 from termcolor import colored
 import inflect
@@ -197,12 +196,12 @@ def help_menu(settings: dict, items_on_row: int = 2,
     '''
     separator_line(sep="*", color=color)
 
-    cprint(dedent(f'''\
-    You try find number which has {settings["default_digits"]} digit and you cant 
-    repeat same number again. Your result will be save
-    in file {create_user_file_name(settings["default_name"])}.
+    cprint(f'''\
+You try find number which has {settings["default_digits"]} digit and you cant 
+repeat same number again. Your result will be save
+in file {create_user_file_name(settings["default_name"])}.
 
-    '''), color)
+    ''', color)
 
     length = len((menu := settings["default_help_menu_items"]))
     if length > items_on_row:
