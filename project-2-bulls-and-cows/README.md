@@ -3,6 +3,24 @@
 
 Bull & Cows - hra postavená na hádání 4 ciferného čísla
 
+## Instalace doplňkových modulů
+
+V projektu jsou použity následující doplňkové moduly.
+
+```bash
+pip install inflect
+pip install termcolor
+```
+
+```bash
+annotated-types = 0.6.0
+inflect = 7.0.0
+pydantic = 2.6.3
+pydantic_core = 2.16.3
+termcolor = 2.4.0
+typing_extensions = 4.10.0
+```
+
 ## Funkce
 
 - Program obsahuje generátor náhodných čísel, který může generovat libovolné náhodná a unikátní čísla
