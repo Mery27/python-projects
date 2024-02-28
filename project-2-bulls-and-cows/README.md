@@ -73,8 +73,10 @@ def set_user_default_name() -> str:
 
 V souboru si lze v nastavit:
 ```sh
-default_file_with_numbers = "used_numbers.txt"  --  soubor, kde se ukládájí vygenerované čísla
-default_number_digits = 4  --  přepíše se v hlavním programu
+
+default_file_with_numbers = "used_numbers/numbers.txt"  --  soubor, kde se ukládájí vygenerované čísla
+default_different_file_name: bool = True  --  jestli se budou vygenerované čísla ukladat do jednoho souboru, který se vždy přepíše při změně počtu číslic nebo pro každou délku vygenerovaného čísla se vytvoří vlastní soubor
+default_number_digits = 4  --  přepíše se v hlavním programu (jak dlouhé číslo se bude generovat)
 default_range_from = 0  --  od jakého čísla se budou generovat hodnoty
 default_range_to = 9  --  do jakého čísla se budou generovat hodnoty
 default_first_digit_is_null = False  --  jestli se má generovat číslo s nulou na začátku
@@ -94,15 +96,20 @@ zda lze dle nastavení číslo vygenerovat.
 ### generator_unique_number()
 
 Je mu předáno číslo z `generator_random_number()` a pro zaručení unikátnosti se každé vygenerované číslo
-ukládá do souboru `default_file_with_numbers = "used_numbers.txt"`. Pokud v souboru číslo už existuje, tak
+ukládá do souboru `default_file_with_numbers = "used_numbers/numbers.txt"`. Pokud v souboru číslo už existuje, tak
 se generuje nové. Zde dochází ke kontrole, zda pro danou délku čísla existuje ještě možnost unikátního čísla.
 Funkce `get_max_available_options` propočítává dle zadaných proměnných maximální počet možností, které lze
 vygenerovat a ověřuje se s vygenerovanými čísly. Pokud bylo dosaženo limutu a už nelze generovat unikántí
 číslo, tak se musí soubor promazat a začne se zase od začátku.
 
-**Pokud se změní délka čísla například z 3-číselného na 4-číselné, dojde k přepsání souboru s uloženými čísly.**
-
 >Například:
 >Pokud zvolíme `default_range_from = 0`, `default_range_to = 9`, `default_repeat_digit = False` a
 >`default_first_digit_is_null: bool = False` pro `default_number_digits = 4` bude maximální počet možnosti
 >unikátních čísel rovný 4536. Tato kontrola se využije hlavně při jednom nebo dvoumístmém čísle.
+
+### uložení vygenerovaných čísel
+`default_different_file_name` - určuje jak se budou úkládat vygenerované čísla  
+Pokud je nastaveno **True** pro každou délku vygenerovaného čísla se vytvoří vlastní soubor s prefixem např. 2_digit_ a z proměnné `default_file_with_numbers` se vezme název souboru, konečný soubor bude 2_digit_numbers.txt uložený ve složce used_numbers.
+
+Pokud je nastaveno **False** čísla se budou ukládat vždy do stejného souboru  
+**Pokud se změní délka čísla například z 3-číselného na 4-číselné, dojde k přepsání souboru s uloženými čísly.**

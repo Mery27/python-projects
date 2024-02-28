@@ -103,6 +103,17 @@ def get_all_type_files(dir: str = ".",
     return list_of_files
 
 
+def split_path(file_path: str) -> tuple:
+    '''
+    Split file path
+
+        Return
+            dir/file_name.txt  -->  ('dir', 'file_name.txt')\n
+            file_name.txt  -->  ('', 'file_name.txt')\n
+    '''
+    return os.path.split(file_path)
+
+
 def get_lines_from_file(file: str) -> list[str]:
     '''
     Return all lines from file as list. Put realtive path to the file.\n
@@ -251,9 +262,14 @@ def append_to_file(file: str, message: str) -> bool:
 def clear_file(file: str) -> None:
     '''
     Clear all data from file or if file dont exist create new file.
-    Enter relative path to file.
+    Enter relative path to file. If in relative path dir name and dont exists, create new dir.
     '''
-    open(create_abs_path(file), "w").close()
+    dir_path = split_path(file)[0]
+
+    if dir_path and not is_dir(dir_path):
+        create_dir(create_abs_path(dir_path))
+
+    open(create_abs_path(file), mode="w").close()
 
 
 

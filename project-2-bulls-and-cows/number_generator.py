@@ -23,7 +23,12 @@ import file_functions as ff
 
 
 # where we save file, in def same folder as this file
-default_file_with_numbers: str = "used_numbers.txt"
+# prefix if default_different_file_name = True is "{digi}_digit_"
+default_file_with_numbers: str = "used_numbers/numbers.txt"
+# different file name for different digits 4_used_numbers.txt
+# else all numbers will be saved in one file, but always with change digits
+# file will be cleared
+default_different_file_name: bool = True
 # how long number we want guesses, '1234'
 default_number_digits: int = 5
 # range for set use only from 0 to 9
@@ -58,7 +63,8 @@ def generate_unique_number(total_digits: int = default_number_digits,
             So if you generate all this number, list will be cleared
             and you can generate again new 9 uniq numbers.
     '''
-    
+    file = create_file_name_for_used_numbers(file, total_digits)
+
     uniq_number = generate_random_number(total_digits)
     last_item_in_file = ff.get_last_item_from_file(file)
     
@@ -142,6 +148,44 @@ def is_number_used(number: list[str|int], list_numbers: list[str]) -> bool:
     '''
     return True if list_to_string(number) in list_numbers else False    
 
+
+def create_file_name_for_used_numbers(file: str = default_file_with_numbers,
+                               digits: int = default_number_digits,
+                               different_name: bool = default_different_file_name
+                               ) -> str:
+    '''
+    Generate file name for save numbers wich are used.
+    If you want different name for any digits choose default_different_file_name = True,
+    else will be returned name as variable default_file_with_numbers. 
+
+        Parameters:
+            file (str)  --  file name\n
+            digits (int)  --  number of digits\n
+            different_name (bool)  --  True if you want prefix before file name\n
+
+        Example:
+            For differnt name of file for each digit:\n
+            file = used_numbers.txt\n
+            digits = 2\n
+            different_name = True\n
+            Return --> "2_digits_used_numbers.txt"\n
+
+        Return:
+            string with name of file\n
+            "2_digits_used_numbers.txt" or "used_numbers.txt"
+    '''
+
+    file_path = ff.split_path(file)
+
+    if different_name:
+        # prefix 4_digit
+        prefix = str(digits) + "_digit"
+        # filename 4_digit_used_numbers.txt
+        updated_file_name = ff.create_file_prefix(prefix, file_name = file_path[1])
+
+        return ff.create_rel_path(file_path[0], updated_file_name)
+    
+    return file
 
 
 def get_used_numbers(file: str) -> list[str]:
@@ -263,8 +307,9 @@ def is_available_options(list_used_numbers: list) -> bool:
 
 if __name__ == "__main__":
     print("Uniq number: ", generate_unique_number())
-    print("Used numbers from previous session: ", get_used_numbers(default_file_with_numbers))
-    print("Total generated numbers", len(get_used_numbers()))
+    print("Used numbers from previous session: ", get_used_numbers(create_file_name_for_used_numbers()))
+    print("Total generated numbers", len(get_used_numbers(create_file_name_for_used_numbers())))
     print(f"Max available uniq options for {default_number_digits} digit number")
     print(f"and range from {default_range_from} to {default_range_to} is: ", get_max_available_options())
-    print("Can genereate another uniq number: ", is_available_options())
+    print("Can genereate another uniq number: ", is_available_options(
+        get_used_numbers(create_file_name_for_used_numbers())))
