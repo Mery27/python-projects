@@ -154,8 +154,7 @@ def get_used_numbers(file: str) -> list[str]:
         # in this situation this crete new file
         ff.clear_file(file)
 
-    return ff.get_lines_from_file(file)
-
+    return ff.remove_new_line_from_list(ff.get_lines_from_file(file))
 
 
 def list_to_string(list: list) -> str:
