@@ -28,8 +28,9 @@ def remove_first_slash(args: list[str]) -> list[str]:
     Remove slash '/' or " \ " or any not alnum character on the begining of the string.
     '''
     for index, item in enumerate(args):
-        if not item[0].isalnum():
-            args[index] = item[1:]
+        if item:
+            if not item[0].isalnum():
+                args[index] = item[1:]
 
     return args
 
