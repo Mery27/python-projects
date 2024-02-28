@@ -61,11 +61,9 @@ Funkce se musí jmenovat `set_user_` následovano jménem proměnné, kterou chc
 
 ```sh
 def set_user_default_name() -> str:
-
-    pf.separator_line()
-    name = input("Whats your name? ")
-    pf.separator_line()
     
+    name = input("Whats your name? ")
+
     return name
 ```
 
@@ -85,8 +83,7 @@ default_repeat_digit = False  --  jestli se mají opakovat čísla
 
 ### generator_random_number()
 
-Generuje náhodné číslo dle proměnných. Před generování se provedé kontrola, která ověří
-zda lze dle nastavení číslo vygenerovat.
+Generuje náhodné číslo dle proměnných. Před generováním se provedé kontrola, která ověří zda lze dle nastavení číslo vygenerovat.
 
 >Například:
 >Pokud zvolíme `default_range_from = 0`, `default_range_to = 2` a `default_repeat_digit = False` pro 
