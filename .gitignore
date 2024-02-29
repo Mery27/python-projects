@@ -3,6 +3,7 @@ __pycache__
 
 # virtual enviroment
 virtualenv
+.venv
 
 # files
 *.txt
