@@ -95,15 +95,16 @@ def get_table_data_from_url(html_page: bs) -> dict:
     
     dict_of_results = {}
     for row in rows:
-        code = row.select("td:nth-child(1)")[0].get_text()
-        title = row.select("td:nth-child(2)")[0].get_text()
-        url = row.select("td:last-child a")[0].attrs["href"]
+        if row.select("td:nth-child(1)")[0].get_text().isnumeric():
+            code = row.select("td:nth-child(1)")[0].get_text()
+            title = row.select("td:nth-child(2)")[0].get_text()
+            url = row.select("td:last-child a")[0].attrs["href"]
 
-        dict_of_results[title] = {
-            "title": title,
-            "code": code,
-            "url": url
-            }
+            dict_of_results[title] = {
+                "title": title,
+                "code": code,
+                "url": url
+                }
 
     return dict_of_results
 
