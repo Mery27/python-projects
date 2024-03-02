@@ -176,9 +176,9 @@ def get_result_election(url: str) -> dict:
         "election_candidates" : {}
         }
     for col in table_sum_election:
-        result_sum_election["registred"] = col.select("td:nth-child(4)")[0].get_text()
-        result_sum_election["envelops"] = col.select("td:nth-child(7)")[0].get_text()
-        result_sum_election["valid"] = col.select("td:nth-child(8)")[0].get_text()
+        result_sum_election["registred"] = col.select("td[headers='sa2']")[0].get_text().replace("\xa0", "")
+        result_sum_election["envelops"] = col.select("td[headers='sa5']")[0].get_text().replace("\xa0", "")
+        result_sum_election["valid"] = col.select("td[headers='sa6']")[0].get_text().replace("\xa0", "")
     
     table_election_candidate = html_page.select(
         "#outer table tr:nth-child(n+3)"
@@ -186,7 +186,7 @@ def get_result_election(url: str) -> dict:
     for row in table_election_candidate:
         if row.select("td:nth-child(1)")[0].get_text().isnumeric():
             title = row.select("td:nth-child(2)")[0].get_text()
-            votes = row.select("td:nth-child(3)")[0].get_text()
+            votes = row.select("td:nth-child(3)")[0].get_text().replace("\xa0", "")
             result_sum_election["election_candidates"][title] = votes
 
     return result_sum_election
