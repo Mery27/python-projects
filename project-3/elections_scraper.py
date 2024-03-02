@@ -110,7 +110,7 @@ def get_table_data_from_url(html_page: bs) -> dict:
     return dict_of_results
 
 
-def get_data_select_vilage(url: str) -> dict:
+def get_data_select_village(url: str) -> dict:
     '''
     Get result from table, only for "uzemni uroven" and "vyber obce".
     '''
@@ -173,7 +173,7 @@ def get_result_election(url: str) -> dict:
         "registred": 0,
         "envelops": 0,
         "valid": 0,
-        "election_candidate" : {}
+        "election_candidates" : {}
         }
     for col in table_sum_election:
         result_sum_election["registred"] = col.select("td:nth-child(4)")[0].get_text()
