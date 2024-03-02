@@ -103,7 +103,8 @@ def get_table_data_from_url(html_page: bs) -> dict:
             dict_of_results[title] = {
                 "title": title,
                 "code": code,
-                "url": url
+                "url": url,
+                "election_results" : {}
                 }
 
     return dict_of_results
