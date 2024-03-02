@@ -166,7 +166,7 @@ def get_result_election(url: str) -> dict:
     '''
     html_page: bs = get_content_from_url(get_response(create_url(base_url, url)))
     table_sum_election = html_page.select(
-        "#publikace > table tr:nth-child(3)"
+        "#publikace > table tr:last-child"
     )
 
     result_sum_election = {
