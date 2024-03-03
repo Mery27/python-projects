@@ -9,6 +9,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 from pprint import pprint
 import sys
+import csv
+import os
 
 
 base_url = "https://volby.cz/pls/ps2017nss"
@@ -190,3 +192,146 @@ def get_result_election(url: str) -> dict:
             result_sum_election["election_candidates"][title] = votes
 
     return result_sum_election
+
+
+if len(sys.argv) != 3:
+    print(f"Missing argument{'s' if len(sys.argv) == 1 else ''}, program will be stoped.")
+    quit()
+
+# TODO: check if user_url is right url, caintan all parameters
+user_url = sys.argv[1]
+user_file = sys.argv[2]
+
+'''
+'Bartošovice': {
+    'code': '599212',
+        'election_results': {
+        'election_candidates': {
+            'ANO 2011': 281,
+            'Blok proti islam.-Obran.domova': 0,
+            'CESTA ODPOVĚDNÉ SPOLEČNOSTI': 0,
+            'Dobrá volba 2016': 1,
+            'Dělnic.str.sociální spravedl.': 2,
+            'Komunistická str.Čech a Moravy': 104,
+            'Křesť.demokr.unie-Čs.str.lid.': 23,
+            'Občanská demokratická aliance': 0,
+            'Občanská demokratická strana': 39,
+            'REALISTÉ': 1,
+            'ROZUMNÍ-stop migraci,diktát.EU': 2,
+            'Radostné Česko': 2,
+            'Referendum o Evropské unii': 0,
+            'SPORTOVCI': 3,
+            'SPR-Republ.str.Čsl. M.Sládka': 2,
+            'STAROSTOVÉ A NEZÁVISLÍ': 6,
+            'Strana Práv Občanů': 2,
+            'Strana svobodných občanů': 9,
+            'Strana zelených': 13,
+            'Svob.a př.dem.-T.Okamura (SPD)': 140,
+            'TOP 09': 7,
+            'Česká národní fronta': 0,
+            'Česká pirátská strana': 38,
+            'Česká str.sociálně demokrat.': 56,
+            'Česká strana národně sociální': 0,
+            'Řád národa - Vlastenecká unie': 3
+            },
+        'envelops': 735,
+        'registred': 1341,
+        'valid': 734},
+    'title': 'Bartošovice',
+    'url': 'ps33?xjazyk=CZ&xkraj=14&xobec=599212'
+    }}
+'''
+all_villages = {}
+
+for index, (title, village) in enumerate(
+    (list_of_villages := get_data_select_village(user_url).items())
+    ):
+    '''
+    {'code': '599247',
+    'title': 'Bílovec',
+    'url': 'ps33?xjazyk=CZ&xkraj=14&xobec=599247'}
+    '''
+    list_of_results = []
+    # omezení počtu výsledků např. < 2 
+    if index >= 0:
+        all_villages[title] = village
+        # url: [url]
+        village_url = village["url"]
+        if village_url.find("vyber") > 1:
+            all_villages[title]["election_results"] = get_result_election(village_url)
+
+        # If vyber is not in url, need lead others url with okrsek
+        if village_url.find("vyber") == -1:
+            for index, district_url in enumerate((list_of_districts := get_data_select_district(village_url).values())):
+                '''
+                python elections_scraper.py "ps32?xjazyk=CZ&xkraj=14&xnumnuts=8104" "file.csv"
+
+                ['ps311?xjazyk=CZ&xkraj=14&xobec=568741&xvyber=8104',
+                'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=1&xvyber=8104',
+                'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=2&xvyber=8104',
+                'ps311?xjazyk=CZ&xkraj=14&xobec=568481&xvyber=8104',
+                'ps311?xjazyk=CZ&xkraj=14&xobec=546984&xvyber=8104',
+                'ps311?xjazyk=CZ&xkraj=14&xobec=599247&xokrsek=1&xvyber=8104',
+                .....
+                '''
+                result_for_disctrict = get_result_election(district_url)
+                if index == 0:
+                    all_villages[title]["election_results"] = result_for_disctrict
+                else:
+                    for key, value in result_for_disctrict.items():
+                        if key == "election_candidates":
+                            for candidate in result_for_disctrict[key]:
+                                all_villages[title]["election_results"]["election_candidates"][candidate] = int(all_villages[title]["election_results"]["election_candidates"][candidate]) + int(result_for_disctrict["election_candidates"][candidate])
+                        else:
+                            all_villages[title]["election_results"][key] = int(all_villages[title]["election_results"][key]) + int(result_for_disctrict[key])
+
+
+'''
+set result dict to correct data, remove url
+'''
+
+file = os.path.dirname(os.path.realpath(__file__)) + os.sep + user_file
+
+first_result_election_candidates = next(iter(all_villages.values()))["election_results"]
+election_candidates = first_result_election_candidates.get("election_candidates").keys()
+
+header = ["code", "location", "registred", "envelops", "valid", *election_candidates]
+
+result = []
+
+for village in all_villages.values():
+    # předvyplníme, aby se správně vkládali data ze slovníku
+    row = [i for i in range(len(header))]
+    for key_1_lvl in village:
+        # přeskočí url ve slovníku, nepotřebujeme
+        if key_1_lvl == "url":
+            continue
+        # pokud klíče v první úrovní zanoření slovníku odpovídají hodnotě ze headeru
+        # zapiš je do listu na pořadí, ve kterém se nacházejí v headeru
+        if key_1_lvl in header:
+            row[header.index(key_1_lvl)] = village.get(key_1_lvl)
+        elif not village.get(key_1_lvl, {}):
+            # pokud hodnota co není v headeru je ve slovníků, ale je to prázný dict
+            # ověření, aby se neprováděla smyčka v prázdém dictu
+            continue
+        else:
+            for key_2_lvl in village.get(key_1_lvl):
+                # pokud klíče ve druhé úrovní zanoření slovníku ....
+                if key_2_lvl in header:
+                    row[header.index(key_2_lvl)] = village.get(key_1_lvl, {}).get(key_2_lvl, {})
+                elif not village.get(key_1_lvl, {}).get(key_2_lvl, {}):
+                    # pokud hodnota co není v headeru je ve slovníků, ale je to prázný dict
+                    # ověření, aby se neprováděla smyčka v prázdém dictu
+                    continue
+                else:
+                    for key_3_lvl in village.get(key_1_lvl).get(key_2_lvl):
+                    # pokud klíče ve třetím úrovní zanoření slovníku ....
+                        row[header.index(key_3_lvl)] = village.get(key_1_lvl, {}).get(key_2_lvl, {}).get(key_3_lvl, {})
+            
+    result.append(row)
+
+with open(file, mode="w", encoding="UTF_8", newline="") as csvfile:
+    spamwriter = csv.writer(csvfile, delimiter=",")
+    spamwriter.writerow(header)
+    for file_row in result:
+        spamwriter.writerow(file_row)
