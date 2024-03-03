@@ -101,7 +101,7 @@ def get_table_data_from_url(html_page: bs) -> dict:
             url = row.select("td:last-child a")[0].attrs["href"]
 
             dict_of_results[title] = {
-                "title": title,
+                "location": title,
                 "code": code,
                 "url": url,
                 "election_results" : {}
