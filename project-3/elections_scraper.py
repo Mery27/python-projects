@@ -11,6 +11,8 @@ from pprint import pprint
 import sys
 import csv
 import os
+import time
+
 
 
 base_url = "https://volby.cz/pls/ps2017nss"
@@ -29,7 +31,7 @@ def create_url(base_url: str, join_url: str) -> str:
 
 
 def get_response(url: str) -> requests.models.Response:
-    return requests.get(url)
+    return requests.get(url, timeout=120)
 
 
 def get_response_code(response: requests.models.Response) -> int:
@@ -178,9 +180,12 @@ def get_result_election(url: str) -> dict:
         "election_candidates" : {}
         }
     for col in table_sum_election:
-        result_sum_election["registred"] = col.select("td[headers='sa2']")[0].get_text().replace("\xa0", "")
-        result_sum_election["envelops"] = col.select("td[headers='sa5']")[0].get_text().replace("\xa0", "")
-        result_sum_election["valid"] = col.select("td[headers='sa6']")[0].get_text().replace("\xa0", "")
+        result_sum_election["registred"] = col.select(
+            "td[headers='sa2']")[0].get_text().replace("\xa0", "")
+        result_sum_election["envelops"] = col.select(
+            "td[headers='sa3']")[0].get_text().replace("\xa0", "")
+        result_sum_election["valid"] = col.select(
+            "td[headers='sa6']")[0].get_text().replace("\xa0", "")
     
     table_election_candidate = html_page.select(
         "#outer table tr:nth-child(n+3)"
@@ -194,7 +199,32 @@ def get_result_election(url: str) -> dict:
     return result_sum_election
 
 
+def progress_bar(total_from: str|int,
+                 total_to: str|int,
+                 district_from: str|int,
+                 distric_to: str|int,
+                 start_time: time,
+                 timer_format: str = '%M:%S'
+                ):
+    '''
+    Return progress bar in format.
+    Progress: total 2/57  - disctrict 10/109  - time 00:14
+    '''
+    print(f"\rProgress:",
+            f"total {total_from + 1}/{total_to}",
+            f" - disctrict {district_from}/{distric_to}",
+            f" - time {time.strftime(timer_format,time.gmtime(time.time() - start_time))}",
+            end='',
+            flush=True
+            )
+
+
+def separator_line():
+    print("-"*50)
+
+
 if len(sys.argv) != 3:
+    separator_line()
     print(f"Missing argument{'s' if len(sys.argv) == 1 else ''}, program will be stoped.")
     quit()
 
@@ -242,49 +272,64 @@ user_file = sys.argv[2]
     }}
 '''
 all_villages = {}
+# list of all adres on 1.level (seznam mest)
+list_of_villages = get_data_select_village(user_url).items()
 
-for index, (title, village) in enumerate(
-    (list_of_villages := get_data_select_village(user_url).items())
-    ):
+separator_line()
+print("Download data from url: ", user_url)
+separator_line()
+
+start_time = time.time()
+for index_village, (title, village) in enumerate(list_of_villages):
     '''
     {'code': '599247',
     'title': 'Bílovec',
     'url': 'ps33?xjazyk=CZ&xkraj=14&xobec=599247'}
     '''
-    list_of_results = []
-    # omezení počtu výsledků např. < 2 
-    if index >= 0:
-        all_villages[title] = village
-        # url: [url]
-        village_url = village["url"]
-        if village_url.find("vyber") > 1:
-            all_villages[title]["election_results"] = get_result_election(village_url)
+    # complete_url = 0 if index == 0 else complete_url + 1
+    all_villages[title] = village
+    # url: [url]
+    village_url = village["url"]
+    if village_url.find("vyber") > 1:
+        all_villages[title]["election_results"] = get_result_election(village_url)
+        # Progres bar
+        progress_bar(index_village, len(list_of_villages), 0, 0, start_time)
 
-        # If vyber is not in url, need lead others url with okrsek
-        if village_url.find("vyber") == -1:
-            for index, district_url in enumerate((list_of_districts := get_data_select_district(village_url).values())):
-                '''
-                python elections_scraper.py "ps32?xjazyk=CZ&xkraj=14&xnumnuts=8104" "file.csv"
+    # If vyber is not in url, need lead others url with okrsek
+    if village_url.find("vyber") == -1:
+        list_of_districts = get_data_select_district(village_url).values()
+        for index_disctrict, district_url in enumerate(list_of_districts):
+            '''
+            python elections_scraper.py "ps32?xjazyk=CZ&xkraj=14&xnumnuts=8104" "file.csv"
 
-                ['ps311?xjazyk=CZ&xkraj=14&xobec=568741&xvyber=8104',
-                'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=1&xvyber=8104',
-                'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=2&xvyber=8104',
-                'ps311?xjazyk=CZ&xkraj=14&xobec=568481&xvyber=8104',
-                'ps311?xjazyk=CZ&xkraj=14&xobec=546984&xvyber=8104',
-                'ps311?xjazyk=CZ&xkraj=14&xobec=599247&xokrsek=1&xvyber=8104',
-                .....
-                '''
-                result_for_disctrict = get_result_election(district_url)
-                if index == 0:
-                    all_villages[title]["election_results"] = result_for_disctrict
-                else:
-                    for key, value in result_for_disctrict.items():
-                        if key == "election_candidates":
-                            for candidate in result_for_disctrict[key]:
-                                all_villages[title]["election_results"]["election_candidates"][candidate] = int(all_villages[title]["election_results"]["election_candidates"][candidate]) + int(result_for_disctrict["election_candidates"][candidate])
-                        else:
-                            all_villages[title]["election_results"][key] = int(all_villages[title]["election_results"][key]) + int(result_for_disctrict[key])
-
+            ['ps311?xjazyk=CZ&xkraj=14&xobec=568741&xvyber=8104',
+            'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=1&xvyber=8104',
+            'ps311?xjazyk=CZ&xkraj=14&xobec=599212&xokrsek=2&xvyber=8104',
+            'ps311?xjazyk=CZ&xkraj=14&xobec=568481&xvyber=8104',
+            'ps311?xjazyk=CZ&xkraj=14&xobec=546984&xvyber=8104',
+            'ps311?xjazyk=CZ&xkraj=14&xobec=599247&xokrsek=1&xvyber=8104',
+            .....
+            '''
+            result_for_disctrict = get_result_election(district_url)
+            if index_disctrict == 0:
+                all_villages[title]["election_results"] = result_for_disctrict
+            else:
+                for key, value in result_for_disctrict.items():
+                    if key == "election_candidates":
+                        for candidate in result_for_disctrict[key]:
+                            all_villages[title]["election_results"]["election_candidates"][candidate] = int(
+                                all_villages[title]["election_results"]["election_candidates"][candidate]
+                                ) + int(result_for_disctrict["election_candidates"][candidate])
+                    else:
+                        all_villages[title]["election_results"][key] = int(
+                            all_villages[title]["election_results"][key]
+                            ) + int(result_for_disctrict[key])
+                        # Progres bar
+            progress_bar(index_village,
+                         len(list_of_villages),
+                         index_disctrict,
+                         len(list_of_districts),
+                         start_time)
 
 '''
 set result dict to correct data, remove url
@@ -299,7 +344,12 @@ header = ["code", "location", "registred", "envelops", "valid", *election_candid
 
 result = []
 
-for village in all_villages.values():
+separator_line()
+print("Saving data to te file: ", user_file)
+
+for index, village in enumerate(all_villages.values()):
+    # Progres bar
+    print(f"\rProgress: {index + 1}/{len(all_villages)}", end='', flush=True)
     # předvyplníme, aby se správně vkládali data ze slovníku
     row = [i for i in range(len(header))]
     for key_1_lvl in village:
@@ -318,7 +368,8 @@ for village in all_villages.values():
             for key_2_lvl in village.get(key_1_lvl):
                 # pokud klíče ve druhé úrovní zanoření slovníku ....
                 if key_2_lvl in header:
-                    row[header.index(key_2_lvl)] = village.get(key_1_lvl, {}).get(key_2_lvl, {})
+                    row[header.index(key_2_lvl)] = village.get(
+                        key_1_lvl, {}).get(key_2_lvl, {})
                 elif not village.get(key_1_lvl, {}).get(key_2_lvl, {}):
                     # pokud hodnota co není v headeru je ve slovníků, ale je to prázný dict
                     # ověření, aby se neprováděla smyčka v prázdém dictu
@@ -326,7 +377,8 @@ for village in all_villages.values():
                 else:
                     for key_3_lvl in village.get(key_1_lvl).get(key_2_lvl):
                     # pokud klíče ve třetím úrovní zanoření slovníku ....
-                        row[header.index(key_3_lvl)] = village.get(key_1_lvl, {}).get(key_2_lvl, {}).get(key_3_lvl, {})
+                        row[header.index(key_3_lvl)] = village.get(
+                            key_1_lvl, {}).get(key_2_lvl, {}).get(key_3_lvl, {})
             
     result.append(row)
 
@@ -335,3 +387,7 @@ with open(file, mode="w", encoding="UTF_8", newline="") as csvfile:
     spamwriter.writerow(header)
     for file_row in result:
         spamwriter.writerow(file_row)
+
+print("")
+separator_line()
+print("I'm ending the program")
