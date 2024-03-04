@@ -58,7 +58,7 @@ def get_content_from_url(response: requests.models.Response) -> bs:
     return bs(response.content, features="html.parser")
 
 
-def get_table_data_from_url(html_page: bs) -> dict:
+def get_data_select_village(url: str) -> dict:
     '''
     Get dict with all cities for select.
 
@@ -69,16 +69,10 @@ def get_table_data_from_url(html_page: bs) -> dict:
                 'code': 'CZ0100',\n
                 'url': 'ps32?xjazyk=CZ&xkraj=1&xnumnuts=1100'\n
                 },\n
-            'Benešov': {\n
-                'city_name': 'Benešov',\n
-                'code': 'CZ0201',\n
-                'url': 'ps32?xjazyk=CZ&xkraj=2&xnumnuts=2101'\n
-                },\n
-        }
+            'Benešov': {....\n
     '''
-    rows = html_page.select(
-        "table tr:nth-child(n+3)"
-        )
+    html_page = get_content_from_url(get_response(create_url(base_url, url)))
+    rows = html_page.select("table tr:nth-child(n+3)")
     
     dict_of_results = {}
     for row in rows:
@@ -91,36 +85,9 @@ def get_table_data_from_url(html_page: bs) -> dict:
                 header[1]: title,
                 header[0]: code,
                 url_link: url,
-                election_results : {}
-                }
+                election_results : {} }
 
     return dict_of_results
-
-
-def get_data_select_village(url: str) -> dict:
-    '''
-    Get result from table, only for "uzemni uroven" and "vyber obce".
-
-    Return:
-    -------
-        {
-            'Praha': {\n
-                'city_name': 'Praha',\n
-                'code': 'CZ0100',\n
-                'url': 'ps32?xjazyk=CZ&xkraj=1&xnumnuts=1100'\n
-                },\n
-            'Benešov': {\n
-                'city_name': 'Benešov',\n
-                'code': 'CZ0201',\n
-                'url': 'ps32?xjazyk=CZ&xkraj=2&xnumnuts=2101'\n
-                },\n
-        }
-    '''
-    return get_table_data_from_url(
-            get_content_from_url(
-                get_response(
-                    create_url(base_url, url)
-                    )))
 
 
 def get_data_select_district(url: str) -> dict:
@@ -131,9 +98,7 @@ def get_data_select_district(url: str) -> dict:
         {"code": "url"}
     '''
     html_page: bs = get_content_from_url(get_response(create_url(base_url, url)))
-    rows = html_page.select(
-        "table tr:nth-child(n+2)"
-        )
+    rows = html_page.select("table tr:nth-child(n+2)")
     
     dict_of_results = {}
     for row in rows:
@@ -162,16 +127,9 @@ def get_result_election(url: str) -> dict:
         }
     '''
     html_page: bs = get_content_from_url(get_response(create_url(base_url, url)))
-    table_sum_election = html_page.select(
-        "#publikace > table tr:last-child"
-    )
+    table_sum_election = html_page.select("#publikace > table tr:last-child")
 
-    result_sum_election = {
-        header[2]: 0,
-        header[3]: 0,
-        header[4]: 0,
-        election_candidates : {}
-        }
+    result_sum_election = { header[2]: 0, header[3]: 0, header[4]: 0, election_candidates : {} }
     for col in table_sum_election:
         result_sum_election[header[2]] = int(col.select(
             "td[headers='sa2']")[0].get_text().replace("\xa0", ""))
@@ -180,9 +138,7 @@ def get_result_election(url: str) -> dict:
         result_sum_election[header[4]] = int(col.select(
             "td[headers='sa6']")[0].get_text().replace("\xa0", ""))
     
-    table_election_candidate = html_page.select(
-        "#outer table tr:nth-child(n+3)"
-        )
+    table_election_candidate = html_page.select("#outer table tr:nth-child(n+3)")
     for row in table_election_candidate:
         if row.select("td:nth-child(1)")[0].get_text().isnumeric():
             title = row.select("td:nth-child(2)")[0].get_text()
@@ -192,13 +148,10 @@ def get_result_election(url: str) -> dict:
     return result_sum_election
 
 
-def progress_bar(total_from: str|int,
-                 total_to: str|int,
-                 district_from: str|int,
-                 distric_to: str|int,
+def progress_bar(total_from: str|int, total_to: str|int,
+                 district_from: str|int, distric_to: str|int,
                  start_time: time,
-                 timer_format: str = '%M:%S'
-                ):
+                 timer_format: str = '%M:%S'):
     '''
     Return progress bar in format.\n
     Progress: total 2/57  - disctrict 10/109  - time 00:14\n
@@ -208,9 +161,7 @@ def progress_bar(total_from: str|int,
             f"total {total_from + 1}/{total_to}",
             f" - disctrict {district_from}/{distric_to}",
             f" - time {time.strftime(timer_format,time.gmtime(time.time() - start_time))}  ",
-            end='',
-            flush=True
-            )
+            end='', flush=True)
 
 
 def separator_line(space_top: bool = False):
@@ -267,7 +218,6 @@ for index_village, (title, village) in enumerate(list_villages):
                                 int(result_for_disctrict[election_candidates][candidate]))
                     else:
                         result_villages[title][election_results][key] += int(result_for_disctrict[key])
-                        # Progres bar
             progress_bar(index_village, len(list_villages), index_disctrict,
                          len(list_of_districts), start_time)
 
@@ -278,7 +228,6 @@ header.extend(all_election_candidates)
 
 separator_line(space_top=True)
 print("Saving data to te file: ", user_file)
-
 
 result = []
 for index, village in enumerate(result_villages.values()):
