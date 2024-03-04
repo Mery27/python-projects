@@ -228,8 +228,13 @@ if len(sys.argv) != 3:
     print(f"Missing argument{'s' if len(sys.argv) == 1 else ''}, program will be stoped.")
     quit()
 
-# TODO: check if user_url is right url, caintan all parameters
-user_url = sys.argv[1]
+user_url = sys.argv[1].split("/")[-1]
+
+if user_url.find("kraj") == -1 or user_url.find("xnumnuts") == -1:
+    separator_line()
+    print("You enter wrong format URL adress, missing some paramater 'kraj=' or 'xnumnuts='.")
+    quit()
+
 user_file = sys.argv[2]
 
 '''
