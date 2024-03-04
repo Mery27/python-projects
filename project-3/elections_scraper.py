@@ -24,45 +24,40 @@ url_vyber_obce = "ps32?xjazyk=CZ&xkraj=12&xnumnuts=7103"
 url_vyber_okrsku = "ps33?xjazyk=CZ&xkraj=1&xobec=500054"
 # vysledky - jen příklad - finalni stránka
 url_vysledky = "ps311?xjazyk=CZ&xkraj=1&xobec=500054&xokrsek=1001&xvyber=1100"
+request_timeout_seconds = 120
 
 
 def create_url(base_url: str, join_url: str) -> str:
     return base_url + "/" + join_url
 
 
-def get_response(url: str) -> requests.models.Response:
-    return requests.get(url, timeout=120)
-
-
-def get_response_code(response: requests.models.Response) -> int:
+def get_response(url: str) -> requests.models.Response|bool:
     '''
-    Return status code from requests.get().
-    More info on this url https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-
-        Return:
-        -------
-            status_code (int)\n
-            200 = Ok\n
-            204 = Not content\n
-            400 = Bad request\n
-            404 = Not Found\n
-            403 = Forbiden\n
+    Try connection to the url, if it fails in any case, program will be stopped.
     '''
-    return response.status_code
+    try:
+        response = requests.get(url, timeout=request_timeout_seconds)
+        if response.status_code != 200:
+            print(f"Request to {url} failed with {response.status_code} status code.")
+            quit()
+
+    except requests.exceptions.Timeout:
+        print(f"Request timed out. Timeout set to: {request_timeout_seconds} seconds.")
+        quit()
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request give us error: {e}")
+        quit()
+
+    else:
+        return response
 
 
 def get_content_from_url(response: requests.models.Response) -> bs:
     '''
-    Return content from url if response status code return 200 else return
-    warning and quit the program.
+    Return html content from url.
     '''
-    if get_response_code(response) == 200:
-        return bs(response.content, features="html.parser")
-    
-    else:
-        print("We cannot get content from web site.")
-        print(f"Get status code: {get_response_code(response)}")
-        quit()
+    return bs(response.content, features="html.parser")
 
 
 def get_table_data_from_url(html_page: bs) -> dict:
