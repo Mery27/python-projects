@@ -47,14 +47,17 @@ def get_response(url: str) -> requests.models.Response|None:
     try:
         response = requests.get(url, timeout=request_timeout_seconds)
         if response.status_code != 200:
+            separator_line(space_top=True)
             print(f"Request to {url} failed with {response.status_code} status code.")
             quit()
 
     except requests.exceptions.Timeout:
+        separator_line(space_top=True)
         print(f"Request timed out. Timeout set to: {request_timeout_seconds} seconds.")
         quit()
 
     except requests.exceptions.RequestException as e:
+        separator_line(space_top=True)
         print(f"Request give us error: {e}")
         quit()
 
@@ -107,7 +110,7 @@ def get_data_select_district(website_url: str) -> dict:
     '''
     Get result from table, only for "vyber okrsku"
 
-    Result:
+    Return:
         {"code": "url"}
     '''
     html_page: bs = get_content_from_url(website_url)
@@ -169,7 +172,7 @@ def get_result_election(website_url: str) -> dict:
     '''
     Get result as registred, envelops, valid and all election candidates
 
-    Result example:
+    Return:
         {'election_candidates': {
             'ANO 2011': '32',
             'Blok proti islam.-Obran.domova': '0',
@@ -243,10 +246,12 @@ if user_url.find("xnumnuts") == -1 and not user_url == world:
     quit()
 
 user_file = sys.argv[2]
+user_file = user_file if os.path.splitext(user_file)[-1][-3:] == "csv" else user_file + ".csv"
 file = os.path.dirname(os.path.realpath(__file__)) + os.sep + user_file
 
 separator_line()
-print("Download data from url: ", user_url)
+print("Download data from url:")
+print(create_url(base_url, user_url))
 separator_line()
 
 result_villages = {}
