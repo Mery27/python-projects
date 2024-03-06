@@ -36,8 +36,8 @@ header = [title_code, title_location, title_registred, title_envelops, title_val
 header_countries = [title_continent, title_countries, title_city, title_registred, title_envelops, title_valid] 
 
 
-def create_url(base_url: str, join_url: str) -> str:
-    return base_url + "/" + join_url
+def create_url(website_url: str) -> str:
+    return base_url + "/" + website_url
 
 
 def get_response(url: str) -> requests.models.Response|None:
@@ -69,7 +69,7 @@ def get_content_from_url(website_url: str) -> bs:
     '''
     Return html content from url.
     '''
-    response = get_response(create_url(base_url, website_url))
+    response = get_response(create_url(website_url))
 
     return bs(response.content, features="html.parser")
 
@@ -251,7 +251,7 @@ file = os.path.dirname(os.path.realpath(__file__)) + os.sep + user_file
 
 separator_line()
 print("Download data from url:")
-print(create_url(base_url, user_url))
+print(create_url(user_url))
 separator_line()
 
 result_villages = {}
